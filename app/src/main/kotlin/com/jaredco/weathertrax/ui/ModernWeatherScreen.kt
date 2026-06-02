@@ -230,8 +230,8 @@ Shared via WeatherTrax
                                     )
                                 }
 
-                                // Breathing room after hero icon
-                                Spacer(modifier = Modifier.height(12.dp))
+                                // Reduced space after icon - begins unified current-weather group
+                                Spacer(modifier = Modifier.height(8.dp))
 
                                 // Location name with globe icon - positioned to the right (clickable dropdown)
                                 Box(
@@ -475,6 +475,9 @@ Shared via WeatherTrax
                                     }
                                 }
 
+                                // Tighter connection between location and temperature (unified group)
+                                Spacer(modifier = Modifier.height(4.dp))
+
                                 // Main content row: Left side (conditions) + Right side (temperature/condition)
                                 Row(
                                     modifier = Modifier
@@ -483,7 +486,7 @@ Shared via WeatherTrax
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.Top
                                 ) {
-                                    // Left side: Current conditions - tightened spacing within group
+                                    // Left side: Current conditions - ultra-tight spacing within unified group
                                     Column(
                                         modifier = Modifier.weight(0.6f)
                                     ) {
@@ -500,9 +503,10 @@ Shared via WeatherTrax
                                             lineHeight = 20.sp
                                         )
 
-                                        Spacer(modifier = Modifier.height(12.dp))
+                                        // Reduced space (30% tighter) to unify details with temp
+                                        Spacer(modifier = Modifier.height(8.dp))
 
-                                        // Humidity - tighter spacing
+                                        // Humidity - ultra-tight spacing
                                         Text(
                                             text = "Humidity ${current.humidity}%",
                                             fontSize = 14.sp,
@@ -510,9 +514,10 @@ Shared via WeatherTrax
                                             lineHeight = 18.sp
                                         )
 
-                                        Spacer(modifier = Modifier.height(2.dp))
+                                        // Minimal gap within detail group
+                                        Spacer(modifier = Modifier.height(1.dp))
 
-                                        // Rain - tight spacing to feel like one group
+                                        // Rain - feels connected to humidity
                                         val rainValue = weather.weatherForecast?.firstOrNull()?.getTotalPrecipitation() ?: "0.0"
                                         val rainUnit = if (useFahrenheit) "in" else "mm"
                                         val convertedRain = if (useFahrenheit) {
@@ -530,7 +535,7 @@ Shared via WeatherTrax
                                         )
                                     }
 
-                                    // Right side: Hero temperature with condition text
+                                    // Right side: Hero temperature with condition text tightly grouped
                                     Column(
                                         modifier = Modifier.weight(0.4f),
                                         horizontalAlignment = Alignment.End
@@ -543,7 +548,8 @@ Shared via WeatherTrax
                                             lineHeight = 68.sp,
                                             letterSpacing = (-1).sp
                                         )
-                                        Spacer(modifier = Modifier.height(2.dp))
+                                        // Minimal space between temp and condition
+                                        Spacer(modifier = Modifier.height(0.dp))
                                         Text(
                                             text = current.getWeatherDescription(),
                                             fontSize = 15.sp,
@@ -554,8 +560,8 @@ Shared via WeatherTrax
                                     }
                                 }
 
-                                // Breathing room before updated timestamp
-                                Spacer(modifier = Modifier.height(16.dp))
+                                // Reduced breathing room before updated timestamp (unified group continues)
+                                Spacer(modifier = Modifier.height(10.dp))
 
                                 // Updated timestamp with refresh button
                                 Row(
@@ -598,8 +604,8 @@ Shared via WeatherTrax
                                 }
                             }
 
-                        // Major section separation before forecast
-                        Spacer(modifier = Modifier.height(20.dp))
+                        // Intentional separation before forecast (40% reduction from 20dp)
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         // Forecast section - premium polish with better rain units
                         weather.weatherForecast?.take(5)?.let { forecasts ->
@@ -717,19 +723,18 @@ Shared via WeatherTrax
 
                                 Spacer(modifier = Modifier.height(6.dp))
 
-                                // Rain row - improved unit presentation
+                                // Rain row - compact label with inline unit styling
                                 val rainUnit = if (useFahrenheit) "in" else "mm"
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Rain\n($rainUnit)",
-                                        fontSize = 10.sp,
+                                        text = "Rain",
+                                        fontSize = 11.sp,
                                         color = ModernWhite.copy(alpha = 0.5f),
                                         modifier = Modifier.width(50.dp),
-                                        fontWeight = FontWeight.Normal,
-                                        lineHeight = 12.sp
+                                        fontWeight = FontWeight.Normal
                                     )
                                     forecasts.forEach { forecast ->
                                         val rainMm = forecast.getTotalPrecipitation()
@@ -740,15 +745,27 @@ Shared via WeatherTrax
                                         } else {
                                             rainMm
                                         }
-                                        Text(
-                                            text = rainDisplay,
-                                            fontSize = 12.sp,
-                                            color = ModernWhite.copy(alpha = 0.85f),
+                                        Row(
                                             modifier = Modifier.weight(1f),
-                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                            fontWeight = FontWeight.Normal,
-                                            lineHeight = 14.sp
-                                        )
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.Bottom
+                                        ) {
+                                            Text(
+                                                text = rainDisplay,
+                                                fontSize = 12.sp,
+                                                color = ModernWhite.copy(alpha = 0.85f),
+                                                fontWeight = FontWeight.Normal,
+                                                lineHeight = 14.sp
+                                            )
+                                            Spacer(modifier = Modifier.width(2.dp))
+                                            Text(
+                                                text = rainUnit,
+                                                fontSize = 9.sp,
+                                                color = ModernWhite.copy(alpha = 0.5f),
+                                                fontWeight = FontWeight.Normal,
+                                                modifier = Modifier.padding(bottom = 1.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
