@@ -10,10 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -161,7 +161,7 @@ Shared via WeatherTrax
                         }
                     }) {
                         Icon(
-                            Icons.Default.Email,
+                            Icons.Default.Person,
                             contentDescription = "Support",
                             tint = ModernWhite
                         )
@@ -588,13 +588,13 @@ Shared via WeatherTrax
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Spacer(modifier = Modifier.width(50.dp))
-                                    forecasts.forEachIndexed { index, forecast ->
+                                    forecasts.forEach { forecast ->
                                         Box(
                                             modifier = Modifier.weight(1f),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
-                                                text = if (index == 0) "TODAY" else getDayName(forecast.date),
+                                                text = getDayName(forecast.date),
                                                 fontSize = 14.sp,
                                                 color = ModernWhite,
                                                 fontWeight = FontWeight.Bold
