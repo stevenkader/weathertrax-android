@@ -208,11 +208,11 @@ Shared via WeatherTrax
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
-                                // Weather icon - sharper and less dominant (reduced 20%)
+                                // Weather icon - reduced bloom (additional 20% reduction)
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(140.dp),
+                                        .height(130.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     val weatherCode = current.getIconCode()
@@ -225,7 +225,7 @@ Shared via WeatherTrax
                                             }
                                         ),
                                         contentDescription = null,
-                                        modifier = Modifier.size(128.dp),
+                                        modifier = Modifier.size(105.dp),
                                         alpha = 1f
                                     )
                                 }
@@ -253,7 +253,7 @@ Shared via WeatherTrax
                                         ) {
                                             Text(
                                                 text = currentLocation?.areaName ?: "Select Location",
-                                                fontSize = 22.sp,
+                                                fontSize = 19.sp,
                                                 color = ModernWhite,
                                                 fontWeight = FontWeight.Light
                                             )
@@ -503,8 +503,8 @@ Shared via WeatherTrax
                                             lineHeight = 20.sp
                                         )
 
-                                        // Reduced space (30% tighter) to unify details with temp
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        // Pulled closer to feel like single weather summary block
+                                        Spacer(modifier = Modifier.height(6.dp))
 
                                         // Humidity - ultra-tight spacing
                                         Text(
@@ -542,10 +542,10 @@ Shared via WeatherTrax
                                     ) {
                                         Text(
                                             text = "${if (useFahrenheit) current.tempF else current.tempC}°",
-                                            fontSize = 72.sp,
+                                            fontSize = 78.sp,
                                             fontWeight = FontWeight.Thin,
                                             color = ModernGold,
-                                            lineHeight = 68.sp,
+                                            lineHeight = 72.sp,
                                             letterSpacing = (-1).sp
                                         )
                                         // Minimal space between temp and condition
@@ -615,7 +615,7 @@ Shared via WeatherTrax
                                     .background(ForecastBlue.copy(alpha = 0.85f))
                                     .padding(horizontal = 14.dp, vertical = 12.dp)
                             ) {
-                                // Day of week labels - subtle hierarchy
+                                // Day of week labels - reduced emphasis for secondary feel
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -629,10 +629,10 @@ Shared via WeatherTrax
                                         ) {
                                             Text(
                                                 text = getDayName(forecast.date),
-                                                fontSize = 11.sp,
-                                                color = ModernWhite.copy(alpha = 0.7f),
-                                                fontWeight = FontWeight.Medium,
-                                                letterSpacing = 0.3.sp
+                                                fontSize = 10.sp,
+                                                color = ModernWhite.copy(alpha = 0.55f),
+                                                fontWeight = FontWeight.Normal,
+                                                letterSpacing = 0.4.sp
                                             )
                                         }
                                     }
