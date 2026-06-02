@@ -206,13 +206,13 @@ Shared via WeatherTrax
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
                         ) {
                                 // Large weather icon at top - increased size
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(240.dp),
+                                        .height(220.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     val weatherCode = current.getIconCode()
@@ -595,7 +595,7 @@ Shared via WeatherTrax
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(ForecastBlue.copy(alpha = 0.85f))
-                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
                             ) {
                                 // Day of week labels
                                 Row(
@@ -619,7 +619,7 @@ Shared via WeatherTrax
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
 
                                 // Weather icons row
                                 Row(
@@ -648,7 +648,7 @@ Shared via WeatherTrax
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(6.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
 
                                 // High row with degree symbols
                                 Row(
@@ -672,7 +672,7 @@ Shared via WeatherTrax
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(3.dp))
+                                Spacer(modifier = Modifier.height(2.dp))
 
                                 // Low row with degree symbols
                                 Row(
@@ -696,7 +696,7 @@ Shared via WeatherTrax
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(3.dp))
+                                Spacer(modifier = Modifier.height(2.dp))
 
                                 // Rain row
                                 Row(
@@ -704,13 +704,14 @@ Shared via WeatherTrax
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Rain*",
+                                        text = "Rain",
                                         fontSize = 13.sp,
                                         color = ModernWhite,
                                         modifier = Modifier.width(50.dp)
                                     )
                                     forecasts.forEach { forecast ->
                                         val rainMm = forecast.getTotalPrecipitation()
+                                        val rainUnit = if (useFahrenheit) "in" else "mm"
                                         val rainDisplay = if (useFahrenheit) {
                                             // Convert mm to inches
                                             val rainFloat = rainMm.toFloatOrNull() ?: 0f
@@ -719,7 +720,7 @@ Shared via WeatherTrax
                                             rainMm
                                         }
                                         Text(
-                                            text = rainDisplay,
+                                            text = "$rainDisplay $rainUnit",
                                             fontSize = 13.sp,
                                             color = ModernWhite,
                                             modifier = Modifier.weight(1f),
@@ -727,17 +728,6 @@ Shared via WeatherTrax
                                         )
                                     }
                                 }
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                // Unit footnote
-                                Text(
-                                    text = if (useFahrenheit) "* in inches" else "* in mm",
-                                    fontSize = 12.sp,
-                                    color = ModernGray,
-                                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
                             }
                         }
                     }
