@@ -208,11 +208,11 @@ Shared via WeatherTrax
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 4.dp)
                         ) {
-                                // Large weather icon at top - increased size
+                                // Weather icon at top - cleaner, sharper presentation
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(220.dp),
+                                        .height(180.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     val weatherCode = current.getIconCode()
@@ -225,7 +225,8 @@ Shared via WeatherTrax
                                             }
                                         ),
                                         contentDescription = null,
-                                        modifier = Modifier.size(220.dp)
+                                        modifier = Modifier.size(160.dp),
+                                        alpha = 1f
                                     )
                                 }
 
@@ -481,32 +482,34 @@ Shared via WeatherTrax
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.Top
                                 ) {
-                                    // Left side: Current conditions stacked vertically
+                                    // Left side: Current conditions in cleaner H/L format
                                     Column(
                                         modifier = Modifier.weight(0.6f)
                                     ) {
-                                        // Low and High stacked vertically with degree symbol
+                                        // High and Low on same line
                                         Text(
-                                            text = "Low  ${weather.weatherForecast?.firstOrNull()?.let {
+                                            text = "H ${weather.weatherForecast?.firstOrNull()?.let {
+                                                if (useFahrenheit) it.maxTempF else it.maxTempC
+                                            } ?: "--"}°   L ${weather.weatherForecast?.firstOrNull()?.let {
                                                 if (useFahrenheit) it.minTempF else it.minTempC
                                             } ?: "--"}°",
                                             fontSize = 16.sp,
                                             color = ModernGold,
                                             fontWeight = FontWeight.Normal
                                         )
-                                        Spacer(modifier = Modifier.height(3.dp))
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        // Humidity
                                         Text(
-                                            text = "High  ${weather.weatherForecast?.firstOrNull()?.let {
-                                                if (useFahrenheit) it.maxTempF else it.maxTempC
-                                            } ?: "--"}°",
-                                            fontSize = 16.sp,
-                                            color = ModernGold,
-                                            fontWeight = FontWeight.Normal
+                                            text = "Humidity ${current.humidity}%",
+                                            fontSize = 14.sp,
+                                            color = ModernWhite
                                         )
 
                                         Spacer(modifier = Modifier.height(4.dp))
 
-                                        // Humidity and Rain on same line
+                                        // Rain
                                         val rainValue = weather.weatherForecast?.firstOrNull()?.getTotalPrecipitation() ?: "0.0"
                                         val rainUnit = if (useFahrenheit) "in" else "mm"
                                         val convertedRain = if (useFahrenheit) {
@@ -517,16 +520,16 @@ Shared via WeatherTrax
                                             rainValue
                                         }
                                         Text(
-                                            text = "Humidity: ${current.humidity}%    Rain: $convertedRain $rainUnit",
+                                            text = "Rain $convertedRain $rainUnit",
                                             fontSize = 14.sp,
                                             color = ModernWhite
                                         )
                                     }
 
-                                    // Right side: Large temperature with degree symbol
-                                    Box(
+                                    // Right side: Large temperature with weather description
+                                    Column(
                                         modifier = Modifier.weight(0.4f),
-                                        contentAlignment = Alignment.TopEnd
+                                        horizontalAlignment = Alignment.End
                                     ) {
                                         Text(
                                             text = "${if (useFahrenheit) current.tempF else current.tempC}°",
@@ -536,12 +539,18 @@ Shared via WeatherTrax
                                             lineHeight = 64.sp,
                                             letterSpacing = (-1).sp
                                         )
+                                        Text(
+                                            text = current.getWeatherDescription(),
+                                            fontSize = 14.sp,
+                                            color = ModernWhite.copy(alpha = 0.9f),
+                                            fontWeight = FontWeight.Normal
+                                        )
                                     }
                                 }
 
                                 Spacer(modifier = Modifier.height(3.dp))
 
-                                // Observed at timestamp with refresh button
+                                // Updated timestamp with refresh button
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -550,23 +559,16 @@ Shared via WeatherTrax
                                         .padding(horizontal = 16.dp)
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.ic_refresh),
-                                            contentDescription = "Last updated",
-                                            tint = ModernGray,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
                                         val currentTime = remember {
                                             val calendar = Calendar.getInstance()
                                             val timeFormat = SimpleDateFormat("hh:mm a", Locale.US)
                                             timeFormat.format(calendar.time)
                                         }
                                         Text(
-                                            text = "Observed at: $currentTime",
-                                            fontSize = 12.sp,
-                                            color = ModernGray,
-                                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                            text = "Updated $currentTime",
+                                            fontSize = 13.sp,
+                                            color = ModernWhite.copy(alpha = 0.7f),
+                                            fontWeight = FontWeight.Normal
                                         )
                                     }
 
@@ -589,13 +591,13 @@ Shared via WeatherTrax
                                 }
                             }
 
-                        // Forecast section with dark blue background - moved closer
+                        // Forecast section - cleaner, simplified grid
                         weather.weatherForecast?.take(5)?.let { forecasts ->
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(ForecastBlue.copy(alpha = 0.85f))
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
                             ) {
                                 // Day of week labels
                                 Row(
@@ -603,7 +605,7 @@ Shared via WeatherTrax
                                     horizontalArrangement = Arrangement.SpaceEvenly,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Spacer(modifier = Modifier.width(50.dp))
+                                    Spacer(modifier = Modifier.width(45.dp))
                                     forecasts.forEach { forecast ->
                                         Box(
                                             modifier = Modifier.weight(1f),
@@ -611,15 +613,15 @@ Shared via WeatherTrax
                                         ) {
                                             Text(
                                                 text = getDayName(forecast.date),
-                                                fontSize = 14.sp,
-                                                color = ModernWhite,
-                                                fontWeight = FontWeight.Bold
+                                                fontSize = 12.sp,
+                                                color = ModernWhite.copy(alpha = 0.8f),
+                                                fontWeight = FontWeight.Medium
                                             )
                                         }
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(6.dp))
 
                                 // Weather icons row
                                 Row(
@@ -627,7 +629,7 @@ Shared via WeatherTrax
                                     horizontalArrangement = Arrangement.SpaceEvenly,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Spacer(modifier = Modifier.width(50.dp))
+                                    Spacer(modifier = Modifier.width(45.dp))
                                     forecasts.forEach { forecast ->
                                         Box(
                                             modifier = Modifier.weight(1f),
@@ -642,24 +644,25 @@ Shared via WeatherTrax
                                                     }
                                                 ),
                                                 contentDescription = null,
-                                                modifier = Modifier.size(50.dp)
+                                                modifier = Modifier.size(45.dp)
                                             )
                                         }
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(6.dp))
 
-                                // High row with degree symbols
+                                // High row
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "High",
-                                        fontSize = 13.sp,
-                                        color = ModernWhite,
-                                        modifier = Modifier.width(50.dp)
+                                        text = "H",
+                                        fontSize = 12.sp,
+                                        color = ModernWhite.copy(alpha = 0.6f),
+                                        modifier = Modifier.width(45.dp),
+                                        fontWeight = FontWeight.Normal
                                     )
                                     forecasts.forEach { forecast ->
                                         Text(
@@ -667,23 +670,25 @@ Shared via WeatherTrax
                                             fontSize = 13.sp,
                                             color = ModernWhite,
                                             modifier = Modifier.weight(1f),
-                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                            fontWeight = FontWeight.Normal
                                         )
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(2.dp))
+                                Spacer(modifier = Modifier.height(3.dp))
 
-                                // Low row with degree symbols
+                                // Low row
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Low",
-                                        fontSize = 13.sp,
-                                        color = ModernWhite,
-                                        modifier = Modifier.width(50.dp)
+                                        text = "L",
+                                        fontSize = 12.sp,
+                                        color = ModernWhite.copy(alpha = 0.6f),
+                                        modifier = Modifier.width(45.dp),
+                                        fontWeight = FontWeight.Normal
                                     )
                                     forecasts.forEach { forecast ->
                                         Text(
@@ -691,12 +696,13 @@ Shared via WeatherTrax
                                             fontSize = 13.sp,
                                             color = ModernWhite,
                                             modifier = Modifier.weight(1f),
-                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                            fontWeight = FontWeight.Normal
                                         )
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(2.dp))
+                                Spacer(modifier = Modifier.height(3.dp))
 
                                 // Rain row
                                 Row(
@@ -705,9 +711,10 @@ Shared via WeatherTrax
                                 ) {
                                     Text(
                                         text = "Rain",
-                                        fontSize = 13.sp,
-                                        color = ModernWhite,
-                                        modifier = Modifier.width(50.dp)
+                                        fontSize = 11.sp,
+                                        color = ModernWhite.copy(alpha = 0.6f),
+                                        modifier = Modifier.width(45.dp),
+                                        fontWeight = FontWeight.Normal
                                     )
                                     forecasts.forEach { forecast ->
                                         val rainMm = forecast.getTotalPrecipitation()
@@ -721,10 +728,11 @@ Shared via WeatherTrax
                                         }
                                         Text(
                                             text = "$rainDisplay $rainUnit",
-                                            fontSize = 13.sp,
-                                            color = ModernWhite,
+                                            fontSize = 11.sp,
+                                            color = ModernWhite.copy(alpha = 0.9f),
                                             modifier = Modifier.weight(1f),
-                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                            fontWeight = FontWeight.Normal
                                         )
                                     }
                                 }
