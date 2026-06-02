@@ -208,11 +208,11 @@ Shared via WeatherTrax
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
-                                // Large weather icon at top
+                                // Large weather icon at top - increased size
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(140.dp),
+                                        .height(240.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     val weatherCode = current.getIconCode()
@@ -225,7 +225,7 @@ Shared via WeatherTrax
                                             }
                                         ),
                                         contentDescription = null,
-                                        modifier = Modifier.size(120.dp)
+                                        modifier = Modifier.size(220.dp)
                                     )
                                 }
 
@@ -485,11 +485,11 @@ Shared via WeatherTrax
                                     Column(
                                         modifier = Modifier.weight(0.6f)
                                     ) {
-                                        // Low and High stacked vertically (no units)
+                                        // Low and High stacked vertically with degree symbol
                                         Text(
                                             text = "Low  ${weather.weatherForecast?.firstOrNull()?.let {
                                                 if (useFahrenheit) it.minTempF else it.minTempC
-                                            } ?: "--"}",
+                                            } ?: "--"}°",
                                             fontSize = 16.sp,
                                             color = ModernGold,
                                             fontWeight = FontWeight.Normal
@@ -498,7 +498,7 @@ Shared via WeatherTrax
                                         Text(
                                             text = "High  ${weather.weatherForecast?.firstOrNull()?.let {
                                                 if (useFahrenheit) it.maxTempF else it.maxTempC
-                                            } ?: "--"}",
+                                            } ?: "--"}°",
                                             fontSize = 16.sp,
                                             color = ModernGold,
                                             fontWeight = FontWeight.Normal
@@ -506,13 +506,7 @@ Shared via WeatherTrax
 
                                         Spacer(modifier = Modifier.height(4.dp))
 
-                                        // Humidity and Rain stacked vertically
-                                        Text(
-                                            text = "Humidity: ${current.humidity}%",
-                                            fontSize = 14.sp,
-                                            color = ModernWhite
-                                        )
-                                        Spacer(modifier = Modifier.height(3.dp))
+                                        // Humidity and Rain on same line
                                         val rainValue = weather.weatherForecast?.firstOrNull()?.getTotalPrecipitation() ?: "0.0"
                                         val rainUnit = if (useFahrenheit) "in" else "mm"
                                         val convertedRain = if (useFahrenheit) {
@@ -523,19 +517,19 @@ Shared via WeatherTrax
                                             rainValue
                                         }
                                         Text(
-                                            text = "Rain: $convertedRain $rainUnit",
+                                            text = "Humidity: ${current.humidity}%    Rain: $convertedRain $rainUnit",
                                             fontSize = 14.sp,
                                             color = ModernWhite
                                         )
                                     }
 
-                                    // Right side: Large temperature (no degree symbol or unit)
+                                    // Right side: Large temperature with degree symbol
                                     Box(
                                         modifier = Modifier.weight(0.4f),
                                         contentAlignment = Alignment.TopEnd
                                     ) {
                                         Text(
-                                            text = if (useFahrenheit) current.tempF else current.tempC,
+                                            text = "${if (useFahrenheit) current.tempF else current.tempC}°",
                                             fontSize = 72.sp,
                                             fontWeight = FontWeight.Thin,
                                             color = ModernGold,
@@ -547,29 +541,51 @@ Shared via WeatherTrax
 
                                 Spacer(modifier = Modifier.height(3.dp))
 
-                                // Observed at timestamp
+                                // Observed at timestamp with refresh button
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(start = 16.dp)
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
                                 ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_refresh),
-                                        contentDescription = "Refresh",
-                                        tint = ModernGray,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    val currentTime = remember {
-                                        val calendar = Calendar.getInstance()
-                                        val timeFormat = SimpleDateFormat("hh:mm a", Locale.US)
-                                        timeFormat.format(calendar.time)
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_refresh),
+                                            contentDescription = "Last updated",
+                                            tint = ModernGray,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        val currentTime = remember {
+                                            val calendar = Calendar.getInstance()
+                                            val timeFormat = SimpleDateFormat("hh:mm a", Locale.US)
+                                            timeFormat.format(calendar.time)
+                                        }
+                                        Text(
+                                            text = "Observed at: $currentTime",
+                                            fontSize = 12.sp,
+                                            color = ModernGray,
+                                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                        )
                                     }
-                                    Text(
-                                        text = "Observed at: $currentTime",
-                                        fontSize = 12.sp,
-                                        color = ModernGray,
-                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                                    )
+
+                                    // Live refresh button
+                                    IconButton(
+                                        onClick = {
+                                            currentLocation?.let { location ->
+                                                viewModel.fetchWeather(location.latitude, location.longitude)
+                                            }
+                                        },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_refresh),
+                                            contentDescription = "Refresh weather",
+                                            tint = ModernGold,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                 }
                             }
 
@@ -634,7 +650,7 @@ Shared via WeatherTrax
 
                                 Spacer(modifier = Modifier.height(6.dp))
 
-                                // High row (no units)
+                                // High row with degree symbols
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
@@ -647,7 +663,7 @@ Shared via WeatherTrax
                                     )
                                     forecasts.forEach { forecast ->
                                         Text(
-                                            text = if (useFahrenheit) forecast.maxTempF else forecast.maxTempC,
+                                            text = "${if (useFahrenheit) forecast.maxTempF else forecast.maxTempC}°",
                                             fontSize = 13.sp,
                                             color = ModernWhite,
                                             modifier = Modifier.weight(1f),
@@ -658,7 +674,7 @@ Shared via WeatherTrax
 
                                 Spacer(modifier = Modifier.height(3.dp))
 
-                                // Low row (no units)
+                                // Low row with degree symbols
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
@@ -671,7 +687,7 @@ Shared via WeatherTrax
                                     )
                                     forecasts.forEach { forecast ->
                                         Text(
-                                            text = if (useFahrenheit) forecast.minTempF else forecast.minTempC,
+                                            text = "${if (useFahrenheit) forecast.minTempF else forecast.minTempC}°",
                                             fontSize = 13.sp,
                                             color = ModernWhite,
                                             modifier = Modifier.weight(1f),
