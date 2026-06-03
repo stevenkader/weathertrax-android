@@ -19,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -68,6 +69,8 @@ fun ModernWeatherScreen(viewModel: WeatherViewModel) {
     var gpsLatitude by remember { mutableStateOf(0.0) }
     var gpsLongitude by remember { mutableStateOf(0.0) }
     var isFromCurrentLocation by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -94,10 +97,36 @@ fun ModernWeatherScreen(viewModel: WeatherViewModel) {
             } catch (e: SecurityException) {
                 e.printStackTrace()
             }
+        } else {
+            // Permission denied - show friendly message
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "No problem — search for a city instead.",
+                    duration = SnackbarDuration.Short
+                )
+            }
+            // If on empty state, open city search
+            if (savedLocations.isEmpty()) {
+                showInlineSearch = true
+                showLocationDropdown = true
+            }
         }
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = Color(0xFF3A4A5A),
+                        contentColor = ModernWhite,
+                        actionColor = ModernGold
+                    )
+                }
+            )
+        },
         topBar = {
             TopAppBar(
                 title = {
@@ -109,6 +138,18 @@ fun ModernWeatherScreen(viewModel: WeatherViewModel) {
                     )
                 },
                 actions = {
+                    // Add City icon
+                    IconButton(onClick = {
+                        showInlineSearch = true
+                        showLocationDropdown = true
+                    }) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Add City",
+                            tint = ModernWhite
+                        )
+                    }
+
                     // Share icon
                     IconButton(onClick = {
                         weatherState?.let { weather ->
@@ -779,15 +820,56 @@ Shared via WeatherTrax
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = if (savedLocations.isEmpty()) {
-                            "Tap + to add a city"
-                        } else {
-                            "Loading weather..."
-                        },
-                        color = ModernWhite,
-                        fontSize = 18.sp
-                    )
+                    if (savedLocations.isEmpty()) {
+                        // First-run onboarding
+                        EmptyStateOnboarding(
+                            onAddCity = { showInlineSearch = true; showLocationDropdown = true },
+                            onUseCurrentLocation = {
+                                isFromCurrentLocation = true
+                                // Check for location permission
+                                val hasPermission = ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.ACCESS_FINE_LOCATION
+                                ) == PackageManager.PERMISSION_GRANTED ||
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                ) == PackageManager.PERMISSION_GRANTED
+
+                                if (hasPermission) {
+                                    // Get location directly
+                                    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+                                    try {
+                                        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                                            location?.let {
+                                                gpsLatitude = it.latitude
+                                                gpsLongitude = it.longitude
+                                                viewModel.fetchWeather(it.latitude.toString(), it.longitude.toString())
+                                                showGpsSaveDialog = true
+                                            }
+                                        }
+                                    } catch (e: SecurityException) {
+                                        e.printStackTrace()
+                                    }
+                                } else {
+                                    // Request permission
+                                    locationPermissionLauncher.launch(
+                                        arrayOf(
+                                            Manifest.permission.ACCESS_FINE_LOCATION,
+                                            Manifest.permission.ACCESS_COARSE_LOCATION
+                                        )
+                                    )
+                                }
+                            }
+                        )
+                    } else {
+                        // Loading state
+                        Text(
+                            text = "Loading weather...",
+                            color = ModernWhite,
+                            fontSize = 18.sp
+                        )
+                    }
                 }
             }
             }
@@ -1081,6 +1163,89 @@ fun GpsLocationNameDialog(
         containerColor = Color(0xFF2C2C2C),
         textContentColor = ModernWhite
     )
+}
+
+@Composable
+private fun EmptyStateOnboarding(
+    onAddCity: () -> Unit,
+    onUseCurrentLocation: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Title
+        Text(
+            text = "Add your first city",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Medium,
+            color = ModernWhite,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Body text
+        Text(
+            text = "Search by city name, ZIP/postal code, or use your current location.",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Normal,
+            color = ModernWhite.copy(alpha = 0.8f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            lineHeight = 22.sp
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Primary button - Add City
+        Button(
+            onClick = onAddCity,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = ModernGold,
+                contentColor = Color(0xFF1A1A1A)
+            ),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Add City",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Secondary button - Use Current Location
+        OutlinedButton(
+            onClick = onUseCurrentLocation,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = ModernWhite
+            ),
+            border = androidx.compose.foundation.BorderStroke(1.5.dp, ModernWhite.copy(alpha = 0.3f)),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                text = "Use Current Location",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal
+            )
+        }
+    }
 }
 
 private fun getDayName(dateString: String): String {
