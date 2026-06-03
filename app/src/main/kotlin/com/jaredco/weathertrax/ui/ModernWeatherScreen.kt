@@ -107,8 +107,7 @@ fun ModernWeatherScreen(viewModel: WeatherViewModel) {
             }
             // If on empty state, open city search
             if (savedLocations.isEmpty()) {
-                showInlineSearch = true
-                showLocationDropdown = true
+                viewModel.showSearchDialog()
             }
         }
     }
@@ -140,8 +139,7 @@ fun ModernWeatherScreen(viewModel: WeatherViewModel) {
                 actions = {
                     // Add City icon
                     IconButton(onClick = {
-                        showInlineSearch = true
-                        showLocationDropdown = true
+                        viewModel.showSearchDialog()
                     }) {
                         Icon(
                             Icons.Default.Add,
@@ -823,7 +821,7 @@ Shared via WeatherTrax
                     if (savedLocations.isEmpty()) {
                         // First-run onboarding
                         EmptyStateOnboarding(
-                            onAddCity = { showInlineSearch = true; showLocationDropdown = true },
+                            onAddCity = { viewModel.showSearchDialog() },
                             onUseCurrentLocation = {
                                 isFromCurrentLocation = true
                                 // Check for location permission
