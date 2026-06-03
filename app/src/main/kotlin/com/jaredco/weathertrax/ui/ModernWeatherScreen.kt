@@ -766,8 +766,7 @@ Shared via WeatherTrax
 
                                 Spacer(modifier = Modifier.height(6.dp))
 
-                                // Rain row - compact label with inline unit styling
-                                val rainUnit = if (useFahrenheit) "in" else "mm"
+                                // Rain row - numeric values only
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
@@ -788,27 +787,15 @@ Shared via WeatherTrax
                                         } else {
                                             rainMm
                                         }
-                                        Row(
+                                        Text(
+                                            text = rainDisplay,
+                                            fontSize = 12.sp,
+                                            color = ModernWhite.copy(alpha = 0.85f),
                                             modifier = Modifier.weight(1f),
-                                            horizontalArrangement = Arrangement.Center,
-                                            verticalAlignment = Alignment.Bottom
-                                        ) {
-                                            Text(
-                                                text = rainDisplay,
-                                                fontSize = 12.sp,
-                                                color = ModernWhite.copy(alpha = 0.85f),
-                                                fontWeight = FontWeight.Normal,
-                                                lineHeight = 14.sp
-                                            )
-                                            Spacer(modifier = Modifier.width(2.dp))
-                                            Text(
-                                                text = rainUnit,
-                                                fontSize = 9.sp,
-                                                color = ModernWhite.copy(alpha = 0.5f),
-                                                fontWeight = FontWeight.Normal,
-                                                modifier = Modifier.padding(bottom = 1.dp)
-                                            )
-                                        }
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                            fontWeight = FontWeight.Normal,
+                                            lineHeight = 14.sp
+                                        )
                                     }
                                 }
                             }
