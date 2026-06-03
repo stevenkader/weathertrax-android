@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -19,6 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -37,6 +40,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.jaredco.weathertrax.R
 import com.jaredco.weathertrax.WeatherViewModel
+import com.jaredco.weathertrax.data.SearchResult
 import com.jaredco.weathertrax.util.WeatherIconMapper
 import java.text.SimpleDateFormat
 import java.util.*
@@ -881,17 +885,13 @@ Shared via WeatherTrax
                 )
             }
 
-            // Search Dialog (reuse from classic)
+            // Autocomplete Search Dialog
             if (showSearchDialog) {
-                SearchLocationDialog(
+                AutocompleteSearchDialog(
                     searchResults = searchResults,
                     onSearch = { query -> viewModel.searchCity(query) },
-                    onSelectLocation = { result, saveInList ->
-                        if (saveInList) {
-                            viewModel.addLocation(result)
-                        } else {
-                            viewModel.fetchWeather(result.latitude, result.longitude)
-                        }
+                    onSelectLocation = { result ->
+                        viewModel.addLocation(result)
                         viewModel.hideSearchDialog()
                     },
                     onDismiss = { viewModel.hideSearchDialog() }
@@ -1159,6 +1159,153 @@ fun GpsLocationNameDialog(
             }
         },
         containerColor = Color(0xFF2C2C2C),
+        textContentColor = ModernWhite
+    )
+}
+
+@Composable
+private fun AutocompleteSearchDialog(
+    searchResults: List<SearchResult>,
+    onSearch: (String) -> Unit,
+    onSelectLocation: (SearchResult) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+
+    // Trigger search automatically as user types (with minimum 2 characters)
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.length >= 2) {
+            kotlinx.coroutines.delay(300) // Debounce 300ms
+            onSearch(searchQuery)
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Add City",
+                color = ModernWhite,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 200.dp, max = 500.dp)
+            ) {
+                // Search field with autocomplete
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("City name, ZIP, or postal code", color = ModernGray) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = ModernWhite,
+                        unfocusedTextColor = ModernWhite,
+                        cursorColor = ModernGold,
+                        focusedBorderColor = ModernGold,
+                        unfocusedBorderColor = ModernGray,
+                        focusedPlaceholderColor = ModernGray,
+                        unfocusedPlaceholderColor = ModernGray
+                    ),
+                    singleLine = true,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+                )
+
+                // Show results as dropdown list
+                if (searchResults.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        "Tap to select:",
+                        color = ModernWhite.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, fill = false)
+                    ) {
+                        items(searchResults) { result ->
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onSelectLocation(result) }
+                                    .padding(vertical = 2.dp),
+                                color = Color.Transparent,
+                                shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = result.areaName,
+                                            color = ModernWhite,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        if (result.region.isNotEmpty() && result.region != result.areaName) {
+                                            Text(
+                                                text = "${result.region}, ${result.country}",
+                                                color = ModernWhite.copy(alpha = 0.6f),
+                                                fontSize = 13.sp
+                                            )
+                                        } else {
+                                            Text(
+                                                text = result.country,
+                                                color = ModernWhite.copy(alpha = 0.6f),
+                                                fontSize = 13.sp
+                                            )
+                                        }
+                                    }
+                                    Icon(
+                                        imageVector = Icons.Default.KeyboardArrowDown,
+                                        contentDescription = null,
+                                        tint = ModernGold,
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .rotate(270f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else if (searchQuery.length >= 2) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "Type to search...",
+                        color = ModernWhite.copy(alpha = 0.5f),
+                        fontSize = 14.sp,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "Enter at least 2 characters",
+                        color = ModernWhite.copy(alpha = 0.5f),
+                        fontSize = 14.sp,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = ModernWhite)
+            }
+        },
+        containerColor = Color(0xFF2C3E50),
         textContentColor = ModernWhite
     )
 }
